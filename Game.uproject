@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "{427FA425-4D83-F679-6F9E-A99E0A559632}",
+	"EngineAssociation": "ADD7D39A-4642-061C-11A8-DE8AB25077DB",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -9,7 +9,8 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
-				"Engine", "VoxelWorld"
+				"Engine",
+				"VoxelWorld"
 			]
 		}
 	]

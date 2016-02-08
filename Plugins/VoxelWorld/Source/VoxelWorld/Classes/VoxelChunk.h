@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Components/MeshComponent.h"
+#include <Engine.h>
 #include "VoxelChunk.generated.h"
 
 

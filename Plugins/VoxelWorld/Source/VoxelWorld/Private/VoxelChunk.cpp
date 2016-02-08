@@ -2,7 +2,7 @@
 
 #include "VoxelWorldPrivatePCH.h"
 #include "VoxelChunk.h"
-#include "VertexFactory.h"
+#include "VoxelGeometry.h"
 
 // Sets default values for this component's properties
 UCubeVoxelChunk::UCubeVoxelChunk() {

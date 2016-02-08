@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "GameFramework/Actor.h"
+#include <Engine.h>
 #include "VoxelTerrain.generated.h"
 
 UCLASS()
