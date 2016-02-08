@@ -1,0 +1,16 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{427FA425-4D83-F679-6F9E-A99E0A559632}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "Game",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine", "VoxelWorld"
+			]
+		}
+	]
+}
