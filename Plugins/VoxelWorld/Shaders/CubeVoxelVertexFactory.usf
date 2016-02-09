@@ -1,6 +1,5 @@
 
 #include "VertexFactoryCommon.usf"
-#include "LocalVertexFactoryCommon.usf"
 
 float4x4 PreviousLocalToWorld;
 float4 LightMapCoordinateScaleBias;
@@ -13,9 +12,9 @@ struct FVertexFactoryInput
 	float4 Position : ATTRIBUTE0;
 	float2 TexCoord : ATTRIBUTE1;
 #if METAL_PROFILE
-	float3 TangentZ : ATTRIBUTE2;
+	float4 TangentZ : ATTRIBUTE2;
 #else
-	half3 TangentZ : ATTRIBUTE2;
+	half4 TangentZ : ATTRIBUTE2;
 #endif // METAL_PROFILE
 };
 
@@ -36,8 +35,26 @@ struct FVertexFactoryInterpolantsVSToPS
 {
 	TANGENTTOWORLD_INTERPOLATOR_BLOCK
 	half4 Color : COLOR0;
-	float4 TexCoord : TEXCOORD0;
+	float2 TexCoord : TEXCOORD0;
 };
+
+float4 GetTangentToWorld2(FVertexFactoryInterpolantsVSToPS Interpolants)
+{
+	#if USE_INTERPOLATOR_345
+		return float4(Interpolants.PackedUVs[0].zw, Interpolants.PackedInterpolator3.zw);
+	#else
+		return float4(0, 0, 0, 1);
+	#endif
+}
+
+float4 GetTangentToWorld0(FVertexFactoryInterpolantsVSToPS Interpolants)
+{
+	#if USE_INTERPOLATOR_345
+		return float4(Interpolants.PackedInterpolator4.zw, Interpolants.PackedInterpolator5.zw);
+	#else
+		return float4(0, 0, 0, 0);
+	#endif
+}
 
 /** Converts from vertex factory specific interpolants to a FMaterialPixelParameters, which is used by material inputs. */
 FMaterialPixelParameters GetMaterialPixelParameters(FVertexFactoryInterpolantsVSToPS Interpolants, float4 PixelPosition)
@@ -50,7 +67,7 @@ FMaterialPixelParameters GetMaterialPixelParameters(FVertexFactoryInterpolantsVS
 	half4 TangentToWorld2 = GetTangentToWorld2(Interpolants);
 	Result.UnMirrored = TangentToWorld2.w;
 
-	Result.VertexColor = GetColor(Interpolants);
+	Result.VertexColor = Interpolants.Color;
 
 	// Required for previewing materials that use ParticleColor
 	Result.Particle.Color = half4(1,1,1,1);
@@ -79,7 +96,7 @@ FMaterialVertexParameters GetMaterialVertexParameters(FVertexFactoryInput Input,
 
 	// does not handle instancing!
 	Result.TangentToWorld = Intermediates.TangentToWorld;
-	Result.TexCoord = Input.TexCoord;
+	Result.TexCoords[0] = Input.TexCoord;
 	return Result;
 }
 
@@ -123,7 +140,7 @@ FVertexFactoryIntermediates GetVertexFactoryIntermediates(FVertexFactoryInput In
 	Intermediates.TangentToWorldSign = TangentBias(Input.TangentZ.w) * Primitive.LocalToWorldDeterminantSign;
 
 	// Swizzle vertex color.
-	Intermediates.Color = half4(1, 1, 1, Input.w) FCOLOR_COMPONENT_SWIZZLE;
+	Intermediates.Color = half4(1, 1, 1, Input.Position.w) FCOLOR_COMPONENT_SWIZZLE;
 	return Intermediates;
 }
 
@@ -155,12 +172,15 @@ FVertexFactoryInterpolantsVSToPS VertexFactoryGetInterpolantsVSToPS(FVertexFacto
 	FVertexFactoryInterpolantsVSToPS Interpolants;
 	Interpolants = (FVertexFactoryInterpolantsVSToPS)0;
 
-	float2 CustomizedUVs[1];
+#if NUM_MATERIAL_TEXCOORDS > 0
+	float2 CustomizedUVs[NUM_MATERIAL_TEXCOORDS];
 	GetMaterialCustomizedUVs(VertexParameters, CustomizedUVs);	
 	Interpolants.TexCoord = CustomizedUVs[0];
+#endif
 
-	SetTangents(Interpolants, Intermediates.TangentToWorld[0], Intermediates.TangentToWorld[2], Intermediates.TangentToWorldSign);
-	SetColor(Interpolants, Intermediates.Color);
+	Interpolants.TangentToWorld0 = float4(Intermediates.TangentToWorld[0], 0);
+	Interpolants.TangentToWorld2 = float4(Intermediates.TangentToWorld[2], Intermediates.TangentToWorldSign);
+	Interpolants.Color = Intermediates.Color;
 	return Interpolants;
 }
 
