@@ -61,7 +61,9 @@ FMaterialPixelParameters GetMaterialPixelParameters(FVertexFactoryInterpolantsVS
 {
 	// GetMaterialPixelParameters is responsible for fully initializing the result
 	FMaterialPixelParameters Result = MakeInitializedMaterialPixelParameters();
+#if NUM_MATERIAL_TEXCOORDS > 0
 	Result.TexCoords[0] = Interpolants.TexCoord;
+#endif
 
 	half3 TangentToWorld0 = GetTangentToWorld0(Interpolants).xyz;
 	half4 TangentToWorld2 = GetTangentToWorld2(Interpolants);
@@ -96,7 +98,10 @@ FMaterialVertexParameters GetMaterialVertexParameters(FVertexFactoryInput Input,
 
 	// does not handle instancing!
 	Result.TangentToWorld = Intermediates.TangentToWorld;
+
+#if NUM_MATERIAL_TEXCOORDS > 0
 	Result.TexCoords[0] = Input.TexCoord;
+#endif
 	return Result;
 }
 
